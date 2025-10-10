@@ -1,0 +1,16 @@
+defaults:
+  format: compact  # raw | compact | locale
+  decimals: 1
+
+stats:
+  invio-stars:
+    provider: github
+    metric: stars
+    repo: kittendevv/Invio
+    cache_ttl: 3600
+
+  react-stars:
+    provider: github
+    metric: stars
+    repo: facebook/react
+    cache_ttl: 7200

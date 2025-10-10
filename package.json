@@ -1,0 +1,21 @@
+{
+  "name": "keisoku",
+  "version": "1.0.0",
+  "description": "Self-hosted API for tracking stats from anywhere",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --watch src/index.ts",
+    "start": "bun run src/index.ts"
+  },
+  "dependencies": {
+    "hono": "^4.6.14",
+    "js-yaml": "^4.1.0",
+    "node-cache": "^5.1.2",
+    "undici": "^7.16.0",
+    "yaml": "^2.6.1"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/js-yaml": "^4.0.9"
+  }
+}
