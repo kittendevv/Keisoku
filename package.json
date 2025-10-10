@@ -1,6 +1,6 @@
 {
   "name": "keisoku",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Self-hosted API for tracking stats from anywhere",
   "type": "module",
   "scripts": {
