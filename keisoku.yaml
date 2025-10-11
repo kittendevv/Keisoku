@@ -3,14 +3,15 @@ defaults:
   decimals: 1
 
 stats:
-  invio-stars:
-    provider: github
-    metric: stars
-    repo: kittendevv/Invio
+  keisoku-npm:
+    provider: npm
+    metric: downloads
+    package: keisoku
+    params:
+      period: last-month  # could also be last-day, last-week
     cache_ttl: 3600
 
   react-stars:
     provider: github
     metric: stars
     repo: facebook/react
-    cache_ttl: 7200

@@ -1,46 +1,47 @@
-import { getCached, setCached } from "../utils/cache";
-import { KeisokuConfig, StatConfig } from "../utils/config";
+import { ProviderHandler } from "../types/provider";
+import NodeCache from "node-cache";
+import { loadConfig } from "../utils/config";
 
-const GITHUB_API = "https://api.github.com";
+const cache = new NodeCache();
 
-export async function fetchGithubMetric(statId: string, config: StatConfig) {
-  const cacheKey = `github:${statId}`;
-  const cached = getCached(cacheKey);
-  if (cached) return cached;
+const githubProvider: ProviderHandler = {
+  meta: {
+    name: "GitHub",
+    description: "Fetch repository stats from GitHub (stars, forks, issues)",
+    version: "1.0.0",
+    author: "CodingKitten",
+  },
 
-  if (!config.repo) {
-    throw new Error(`Missing "repo" for ${statId}`);
-  }
+  async fetch(statId, statConfig) {
+    const cacheKey = `github-${statId}`;
+    const cached = cache.get<number>(cacheKey);
+    if (cached) return cached;
 
-  const url = `${GITHUB_API}/repos/${config.repo}`;
-  const headers: Record<string, string> = {
-    "User-Agent": "keisoku",
-  };
+    const { repo, metric, cache_ttl } = statConfig;
+    const token = process.env.GITHUB_TOKEN;
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-  if (process.env.GITHUB_TOKEN) {
-    headers["Authorization"] = `Bearer ${process.env.GITHUB_TOKEN}`;
-  }
+    const res = await fetch(`https://api.github.com/repos/${repo}`, { headers });
+    const data = await res.json();
 
-  const res = await fetch(url, { headers });
-  if (!res.ok) throw new Error(`GitHub API error for ${config.repo}`);
+    let value = 0;
+    switch (metric) {
+      case "stars":
+        value = data.stargazers_count;
+        break;
+      case "forks":
+        value = data.forks_count;
+        break;
+      case "issues":
+        value = data.open_issues_count;
+        break;
+      default:
+        throw new Error(`Unsupported metric: ${metric}`);
+    }
 
-  const data = await res.json();
-  let value: number;
+    cache.set(cacheKey, value, cache_ttl || 3600);
+    return value;
+  },
+};
 
-  switch (config.metric) {
-    case "stars":
-      value = data.stargazers_count;
-      break;
-    case "forks":
-      value = data.forks_count;
-      break;
-    case "issues":
-      value = data.open_issues_count;
-      break;
-    default:
-      throw new Error(`Unsupported metric: ${config.metric}`);
-  }
-
-  setCached(cacheKey, value, config.cache_ttl ?? 3600);
-  return value;
-}
+export default githubProvider;
