@@ -7,6 +7,6 @@ export interface ProviderMetadata {
   
   export interface ProviderHandler {
     meta: ProviderMetadata;
-    fetch(statId: string, statConfig: Record<string, any>): Promise<number>;
+    fetch(statId: string, statConfig: Record<string, any>): Promise<number | string>;
   }
   

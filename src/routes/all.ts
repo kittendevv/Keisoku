@@ -1,21 +1,10 @@
 import { Hono } from "hono";
-import { loadConfig } from "../utils/config";
-import { getStatValue } from "../utils/statFetcher";
+import { getAllStats } from "../utils/statFetcher";
 
 export const allRoute = new Hono();
-const config = loadConfig();
 
 allRoute.get("/all", async (c) => {
-  const results: Record<string, any> = {};
-
-  for (const statId in config.stats) {
-    try {
-      const { id, ...rest } = await getStatValue(statId);
-      results[statId] = rest;
-    } catch (err: any) {
-      results[statId] = { error: err.message };
-    }
-  }
-
+  const name = c.req.param("name");
+  const results = await getAllStats(name);
   return c.json(results);
 });
