@@ -1,6 +1,7 @@
 import { loadConfig } from "./config";
 import { fetchGithubMetric } from "../providers/github";
 import { fetchNpmMetric } from "../providers/npm";
+import { fetchGitlabMetric } from "../providers/gitlab";
 import { formatValue } from "./formatter";
 
 export async function getStatValue(statId: string, name?: string) {
@@ -16,6 +17,9 @@ export async function getStatValue(statId: string, name?: string) {
       break;
     case "npm":
       value = await fetchNpmMetric(statId, stat);
+      break;
+    case "gitlab":
+      value = await fetchGitlabMetric(statId, stat);
       break;
     default:
       throw new Error(`Unsupported provider: ${stat.provider}`);
