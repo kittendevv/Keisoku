@@ -1,12 +1,20 @@
 import { Hono } from "hono";
+import { swaggerUI } from "@hono/swagger-ui";
+import { cors } from "hono/cors";
 import { loadProviders } from "./utils/providers";
 import { getAllStats, getStatValue } from "./utils/statFetcher";
 import { listProviders } from "./utils/providers";
+import { openApiSpec } from "./openapi";
 
 const app = new Hono();
 
+app.use("/api/*", cors({ origin: "*" }));
+
 // Load providers on startup
 loadProviders();
+
+app.get("/api/openapi.json", (c) => c.json(openApiSpec));
+app.get("/api/docs", swaggerUI({ url: "/api/openapi.json" }));
 
 function getConfigName(c: any): string | undefined {
   const file = c.req.query("file");
