@@ -13,6 +13,8 @@ app.use("/api/*", cors({ origin: "*" }));
 // Load providers on startup
 loadProviders();
 
+app.get("/", (c) => c.text("Keisoku API, visit /api/docs for API documentation"));
+
 app.get("/api/openapi.json", (c) => c.json(openApiSpec));
 app.get("/api/docs", swaggerUI({ url: "/api/openapi.json" }));
 
