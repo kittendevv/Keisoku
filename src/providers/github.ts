@@ -1,6 +1,5 @@
 import { ProviderHandler } from "../types/provider";
 import NodeCache from "node-cache";
-import { loadConfig } from "../utils/config";
 
 const cache = new NodeCache();
 

@@ -1,0 +1,32 @@
+[
+  {
+    "file": "npm.ts",
+    "id": "npm",
+    "meta": {
+      "name": "npm",
+      "description": "Fetch package statistics from npm registry",
+      "version": "1.0.0",
+      "author": "CodingKitten"
+    }
+  },
+  {
+    "file": "gitlab.ts",
+    "id": "gitlab",
+    "meta": {
+      "name": "GitLab",
+      "description": "Fetch repository stats from GitLab (stars, forks, issues, merge requests)",
+      "version": "1.0.0",
+      "author": "CodingKitten"
+    }
+  },
+  {
+    "file": "github.ts",
+    "id": "github",
+    "meta": {
+      "name": "GitHub",
+      "description": "Fetch repository stats from GitHub (stars, forks, issues, downloads)",
+      "version": "1.0.0",
+      "author": "CodingKitten"
+    }
+  }
+]

@@ -1,8 +1,6 @@
 import { loadConfig } from "./config";
-import { fetchGithubMetric } from "../providers/github";
-import { fetchNpmMetric } from "../providers/npm";
-import { fetchGitlabMetric } from "../providers/gitlab";
 import { formatValue } from "./formatter";
+import { getProvider, loadProviders } from "./providers";
 
 export async function getStatValue(statId: string, name?: string) {
   const config = loadConfig(name);
@@ -11,19 +9,14 @@ export async function getStatValue(statId: string, name?: string) {
 
   let value: number | string;
 
-  switch (stat.provider) {
-    case "github":
-      value = await fetchGithubMetric(statId, stat);
-      break;
-    case "npm":
-      value = await fetchNpmMetric(statId, stat);
-      break;
-    case "gitlab":
-      value = await fetchGitlabMetric(statId, stat);
-      break;
-    default:
-      throw new Error(`Unsupported provider: ${stat.provider}`);
+  if (!getProvider(stat.provider)) {
+    await loadProviders();
   }
+
+  const provider = getProvider(stat.provider);
+  if (!provider) throw new Error(`Unsupported provider: ${stat.provider}`);
+
+  value = await provider.fetch(statId, stat);
 
   const format = stat.format ?? config.defaults?.format ?? "raw";
   const decimals = stat.decimals ?? config.defaults?.decimals ?? 1;
