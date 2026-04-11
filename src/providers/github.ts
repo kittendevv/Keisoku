@@ -22,9 +22,16 @@ export async function fetchGithubMetric(statId: string, statConfig: Record<strin
     const res = await fetch(url, { headers });
     if (!res.ok) throw new Error(`Failed to fetch from GitHub: ${res.status}`);
     const html = await res.text();
-    const totalDownloadsMatch = html.match(/<span class="d-block color-fg-muted text-small mb-1">Total downloads<\/span>\s*<h3 title="(\d+)">([^<]+)<\/h3>/i);
+    // Try multiple patterns to handle GitHub HTML structure changes
+    let totalDownloadsMatch = html.match(/<span[^>]*>Total downloads<\/span>\s*<h3 title="(\d+)">([^<]+)<\/h3>/i);
+    if (!totalDownloadsMatch) {
+      // Fallback: try without h3 title attribute
+      totalDownloadsMatch = html.match(/<span[^>]*>Total downloads<\/span>\s*<h3[^>]*>([0-9,]+)/i);
+    }
     if (totalDownloadsMatch) {
-      value = parseInt(totalDownloadsMatch[1]);
+      // Extract the number from either the title attribute or the text content
+      const numStr = totalDownloadsMatch[1].replace(/,/g, '');
+      value = parseInt(numStr);
     } else {
       throw new Error("Could not find download count in HTML");
     }
