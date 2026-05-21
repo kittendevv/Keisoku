@@ -1,51 +1,14 @@
-import { Hono } from "hono";
-import { swaggerUI } from "@hono/swagger-ui";
-import { cors } from "hono/cors";
-import { loadProviders } from "./utils/providers";
-import { getAllStats, getStatValue } from "./utils/statFetcher";
-import { listProviders } from "./utils/providers";
-import { openApiSpec } from "./openapi";
+import { Elysia } from "elysia";
+import { fetchGithubPackageDownloads } from "./providers/github";
 
-const app = new Hono();
+const app = new Elysia()
+  .get("/", () => "Keisoku API, visit /api/docs for API documentation")
+  .get(
+    "/test",
+    fetchGithubPackageDownloads("kittendevv/Invio", "invio-backend"),
+  )
+  .listen(3000);
 
-app.use("/api/*", cors({ origin: "*" }));
-
-// Load providers on startup
-loadProviders();
-
-app.get("/", (c) => c.text("Keisoku API, visit /api/docs for API documentation"));
-
-app.get("/api/openapi.json", (c) => c.json(openApiSpec));
-app.get("/api/docs", swaggerUI({ url: "/api/openapi.json" }));
-
-function getConfigName(c: any): string | undefined {
-  const file = c.req.query("file");
-  return file ? file.trim() || undefined : undefined;
-}
-
-app.get("/api/providers", async (c) => {
-  const data = listProviders();
-  return c.json({
-    count: data.length,
-    providers: data,
-  });
-});
-
-app.get("/api/all", async (c) => {
-  const name = getConfigName(c);
-  const results = await getAllStats(name);
-  return c.json(results);
-});
-
-app.get("/api/:stat", async (c) => {
-  const name = getConfigName(c);
-  const statId = c.req.param("stat");
-  try {
-    const result = await getStatValue(statId, name);
-    return c.json(result);
-  } catch (err: any) {
-    return c.json({ error: err.message }, 400);
-  }
-});
-
-export default app;
+console.log(
+  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`,
+);
