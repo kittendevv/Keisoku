@@ -20,7 +20,7 @@ export async function loadProviders() {
         throw new Error(
           `No export '${source.provider}' in providers/${prefix}.ts`,
         );
-      return { name, ...factory(source) };
+      return { name, format: source.format, ...factory(source) };
     }),
   );
 
@@ -33,10 +33,16 @@ export async function loadProviders() {
   );
 
   // pass 3 — build sum providers
-  const sumProviders = sums.map(([name, source]) => {
-    const { sum } = require("./providers/sum");
-    return { name, ...sum({ name, ...source }, resolved) };
-  });
+  const sumProviders = await Promise.all(
+    sums.map(async ([name, source]) => {
+      const { sum } = await import("./providers/sum");
+      return {
+        name,
+        format: source.format,
+        ...sum({ name, ...source }, resolved),
+      };
+    }),
+  );
 
   return [...providers, ...sumProviders];
 }

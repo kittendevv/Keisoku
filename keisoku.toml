@@ -15,3 +15,4 @@ package = "invio"
 [metrics.invio_total_downloads]
 provider = "sum"
 of = ["invio_backend_downloads", "invio_downloads"]
+format = "compact"
