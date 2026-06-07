@@ -20,7 +20,7 @@ export async function loadProviders() {
         throw new Error(
           `No export '${source.provider}' in providers/${prefix}.ts`,
         );
-      return { name, format: source.format, ...factory(source) };
+      return { ...factory(source), name, format: source.format };
     }),
   );
 
