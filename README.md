@@ -1,4 +1,4 @@
-# Keisoku 計測
+![Keisoku Logo](assets/keisoku.png)
 
  > Keisoku is a self-hosted API that aggregates stats from GitHub, npm, and other platforms into a single configurable endpoint. Measure everything, manage nothing.
 
