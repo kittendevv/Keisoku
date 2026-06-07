@@ -1,0 +1,17 @@
+[metrics.invio_stars]
+provider = "github_stars"
+repo = "kittendevv/Invio"
+
+[metrics.invio_backend_downloads]
+provider = "github_package_downloads"
+repo = "kittendevv/Invio"
+package = "invio-backend"
+
+[metrics.invio_downloads]
+provider = "github_package_downloads"
+repo = "kittendevv/Invio"
+package = "invio"
+
+[metrics.invio_total_downloads]
+provider = "sum"
+of = ["invio_backend_downloads", "invio_downloads"]

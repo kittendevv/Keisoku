@@ -1,14 +1,23 @@
 import { Elysia } from "elysia";
-import { fetchGithubPackageDownloads } from "./providers/github";
+import { loadProviders } from "./config";
+
+const providers = await loadProviders();
 
 const app = new Elysia()
   .get("/", () => "Keisoku API, visit /api/docs for API documentation")
-  .get(
-    "/test",
-    fetchGithubPackageDownloads("kittendevv/Invio", "invio-backend"),
-  )
+  .get("/stats", async () => {
+    const results = await Promise.allSettled(providers.map((p) => p.fetch()));
+    return Object.fromEntries(
+      providers.map((p, i) => [
+        p.name,
+        results[i].status === "fulfilled"
+          ? results[i].value
+          : { error: (results[i] as PromiseRejectedResult).reason?.message },
+      ]),
+    );
+  })
   .listen(3000);
 
 console.log(
-  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`,
+  `Keisoku is running at ${app.server?.hostname}:${app.server?.port}`,
 );
