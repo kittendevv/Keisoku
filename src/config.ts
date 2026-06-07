@@ -33,11 +33,8 @@ async function resolveProviders(
   const sumProviders = await Promise.all(
     sums.map(async ([name, source]) => {
       const { sum } = await import("./providers/sum");
-      return {
-        name,
-        format: source.format,
-        ...sum({ name, ...source }, resolved),
-      };
+      const { fetch } = sum({ name, of: source.of }, resolved);
+      return { name, format: source.format, fetch };
     }),
   );
 
