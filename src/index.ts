@@ -1,51 +1,65 @@
-import { Hono } from "hono";
-import { swaggerUI } from "@hono/swagger-ui";
-import { cors } from "hono/cors";
-import { loadProviders } from "./utils/providers";
-import { getAllStats, getStatValue } from "./utils/statFetcher";
-import { listProviders } from "./utils/providers";
-import { openApiSpec } from "./openapi";
+import { Elysia } from "elysia";
+import { openapi } from "@elysia/openapi";
+import { cors } from "@elysiajs/cors";
+import { loadConfig } from "./config";
+import { formatValue } from "./format";
 
-const app = new Hono();
+const { providers, port } = await loadConfig();
 
-app.use("/api/*", cors({ origin: "*" }));
+const app = new Elysia()
+  .use(cors())
+  .use(openapi())
+  .get("/", () => "Keisoku API, visit /openapi for API documentation")
+  .get("/api/all", async () => {
+    const results = await Promise.allSettled(providers.map((p) => p.fetch()));
+    return Object.fromEntries(
+      providers.map((p, i) => {
+        if (results[i].status === "rejected")
+          return [
+            p.name,
+            { error: (results[i] as PromiseRejectedResult).reason?.message },
+          ];
 
-// Load providers on startup
-loadProviders();
+        const raw = (
+          results[i] as PromiseFulfilledResult<Record<string, number>>
+        ).value;
+        const formatted = p.format
+          ? Object.fromEntries(
+              Object.entries(raw).map(([k, v]) => [
+                k,
+                { raw: v, formatted: formatValue(v, p.format) },
+              ]),
+            )
+          : raw;
 
-app.get("/", (c) => c.text("Keisoku API, visit /api/docs for API documentation"));
+        return [p.name, formatted];
+      }),
+    );
+  })
+  .get("/api/:metric", async ({ params: { metric } }) => {
+    const provider = providers.find((p) => p.name === metric);
+    if (!provider) return Error(`Unknown metric: ${metric}`);
 
-app.get("/api/openapi.json", (c) => c.json(openApiSpec));
-app.get("/api/docs", swaggerUI({ url: "/api/openapi.json" }));
+    try {
+      const raw = await provider.fetch();
+      if (!provider.format) return { [metric]: raw };
+      return {
+        [metric]: Object.fromEntries(
+          Object.entries(raw).map(([k, v]) => [
+            k,
+            {
+              raw: v as number,
+              formatted: formatValue(v as number, provider.format),
+            },
+          ]),
+        ),
+      };
+    } catch (e: any) {
+      return Error(e.message);
+    }
+  })
+  .listen(port);
 
-function getConfigName(c: any): string | undefined {
-  const file = c.req.query("file");
-  return file ? file.trim() || undefined : undefined;
-}
-
-app.get("/api/providers", async (c) => {
-  const data = listProviders();
-  return c.json({
-    count: data.length,
-    providers: data,
-  });
-});
-
-app.get("/api/all", async (c) => {
-  const name = getConfigName(c);
-  const results = await getAllStats(name);
-  return c.json(results);
-});
-
-app.get("/api/:stat", async (c) => {
-  const name = getConfigName(c);
-  const statId = c.req.param("stat");
-  try {
-    const result = await getStatValue(statId, name);
-    return c.json(result);
-  } catch (err: any) {
-    return c.json({ error: err.message }, 400);
-  }
-});
-
-export default app;
+console.log(
+  `Keisoku is running at ${app.server?.hostname}:${app.server?.port}`,
+);
