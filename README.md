@@ -56,7 +56,7 @@ Below is a list of currently supported providers
 | Github    | Package Downloads | github_package_downloads |
 | NPM       | Downloads         | npm_downloads            |
 
-See [documentation](https://example.com) for exact configuration for each provider and stat.
+See [documentation](https://github.com/kittendevv/Keisoku/wiki) for exact configuration for each provider and stat.
 
 ### Selfhosting
 
