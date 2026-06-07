@@ -1,10 +1,10 @@
 import { Elysia } from "elysia";
 import { openapi } from "@elysia/openapi";
 import { cors } from "@elysiajs/cors";
-import { loadProviders } from "./config";
+import { loadConfig } from "./config";
 import { formatValue } from "./format";
 
-const providers = await loadProviders();
+const { providers, port } = await loadConfig();
 
 const app = new Elysia()
   .use(cors())
@@ -36,7 +36,7 @@ const app = new Elysia()
       }),
     );
   })
-  .listen(3000);
+  .listen(port);
 
 console.log(
   `Keisoku is running at ${app.server?.hostname}:${app.server?.port}`,

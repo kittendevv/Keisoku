@@ -1,12 +1,9 @@
 import { readFileSync } from "fs";
 
-export async function loadProviders() {
-  const raw = readFileSync("./keisoku.toml", "utf-8");
-  const config = Bun.TOML.parse(raw) as {
-    metrics: Record<string, { provider: string; [key: string]: any }>;
-  };
-
-  const entries = Object.entries(config.metrics);
+async function resolveProviders(
+  metrics: Record<string, { provider: string; [key: string]: any }>,
+) {
+  const entries = Object.entries(metrics);
   const regular = entries.filter(([, s]) => s.provider !== "sum");
   const sums = entries.filter(([, s]) => s.provider === "sum");
 
@@ -45,4 +42,17 @@ export async function loadProviders() {
   );
 
   return [...providers, ...sumProviders];
+}
+
+export async function loadConfig() {
+  const raw = readFileSync("./keisoku.toml", "utf-8");
+  const config = Bun.TOML.parse(raw) as {
+    server?: { port?: number };
+    metrics: Record<string, { provider: string; [key: string]: any }>;
+  };
+
+  return {
+    port: config.server?.port ?? 3000,
+    providers: await resolveProviders(config.metrics),
+  };
 }

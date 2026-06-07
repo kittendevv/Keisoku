@@ -1,3 +1,6 @@
+[server]
+port = 3000
+
 [metrics.invio_stars]
 provider = "github_stars"
 repo = "kittendevv/Invio"
